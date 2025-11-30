@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مخطط المشارف - الرئيسية ولوحة التحكم</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+
+    <!-- مكتبات الخريطة (Leaflet + FontAwesome) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <!-- روابط وتنسيقات الصفحة الرئيسية -->
+    <link href="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/css/hmdns-ultra-awesome-site.webflow.shared.eb8b22fdd.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/css/hmdns-ultra-awesome-site.webflow.69089ef9e0d4d48699874388-aff4f321b.min.css" rel="stylesheet" type="text/css"/>
+    
+    <!-- الخطوط -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="anonymous"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        WebFont.load({ google: { families: ["Tajawal:200,300,regular,500,700,800,900:arabic,latin"] } });
+    </script>
+    <script type="text/javascript">
+        !function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);
+    </script>
+    <link href="https://cdn.prod.website-files.com/img/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.prod.website-files.com/img/webclip.png" rel="apple-touch-icon"/>
+
+    <style>
+        /* ============================================ */
+        /* تنسيقات عامة                                 */
+        /* ============================================ */
+        body { font-family: 'Tajawal', sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+        
+        #public-wrapper {
+            background-color: transparent; 
+            min-height: 100vh;
+        }
+
+        .login-trigger-container { cursor: pointer; }
+        
+        /* ============================================ */
+        /* تنسيقات لوحة التحكم (Admin Panel)            */
+        /* ============================================ */
+        #admin-wrapper {
+            background-color: #f5f5f5;
+            direction: rtl;
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; min-height: 100vh;
+            z-index: 9999;
+        }
+        #admin-wrapper .header { background-color: #fff; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        #admin-wrapper .header h1 { margin: 0; color: #333; font-size: 24px; }
+        #admin-wrapper .nav-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        #admin-wrapper .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; text-decoration: none; color: white; display: inline-block; transition: 0.3s; }
+        #admin-wrapper .btn:hover { opacity: 0.9; }
+        #admin-wrapper .btn-primary { background-color: #2196F3; }
+        #admin-wrapper .btn-danger { background-color: #f44336; }
+        #admin-wrapper .btn-success { background-color: #4CAF50; }
+        #admin-wrapper .btn-warning { background-color: #ff9800; }
+        #admin-wrapper .btn-info { background-color: #17a2b8; color: white; }
+        
+        #admin-wrapper .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        
+        #admin-wrapper .tabs { display: flex; margin-bottom: 0; border-bottom: 2px solid #ddd; flex-wrap: wrap; gap: 5px; }
+        #admin-wrapper .tab { 
+            padding: 12px 25px; cursor: pointer; border: 1px solid #ddd; border-bottom: none; 
+            background: #f1f1f1; border-radius: 8px 8px 0 0; font-weight: bold; color: #555;
+            transition: all 0.3s ease; flex-grow: 1; text-align: center;
+        }
+        #admin-wrapper .tab:hover { background: #e9e9e9; }
+        #admin-wrapper .tab.active { background-color: #fff; border-color: #ddd; color: #1e3d6f; border-bottom: 2px solid #fff; margin-bottom: -2px; z-index: 2; }
+        
+        #admin-wrapper .tab-content { 
+            display: none; background-color: #fff; padding: 30px; 
+            border: 1px solid #ddd; border-radius: 0 0 8px 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow-x: auto;
+        }
+        #admin-wrapper .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        #admin-wrapper table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #eee; min-width: 600px; }
+        #admin-wrapper th, #admin-wrapper td { padding: 15px; text-align: right; border-bottom: 1px solid #eee; color: #333; }
+        #admin-wrapper th { background-color: #f8f9fa; font-weight: 800; color: #1e3d6f; }
+        #admin-wrapper tr:hover { background-color: #fbfbfb; }
+
+        #admin-wrapper .action-buttons { display: flex; gap: 5px; }
+        #admin-wrapper .action-btn { padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px; color: white; }
+        #admin-wrapper .edit-btn { background-color: #ffc107; color: #000; }
+        #admin-wrapper .delete-btn { background-color: #f44336; }
+        
+        #admin-wrapper .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+        #admin-wrapper .modal.active { display: flex; }
+        #admin-wrapper .modal-content { background-color: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        #admin-wrapper .form-group { margin-bottom: 15px; }
+        #admin-wrapper .form-label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+        #admin-wrapper .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+        #admin-wrapper .form-buttons { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+        #admin-wrapper .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; flex-wrap: wrap; gap: 10px; }
+
+        #loginModalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 20000; align-items: center; justify-content: center; }
+        .login-box { background-color: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center; direction: rtl; }
+        
+        /* ============================================ */
+        /* تنسيقات نظام بيع الأراضي (Map Styles)        */
+        /* ============================================ */
+        #map-wrapper {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f7f7f7; z-index: 10000; color: #222;
+        }
+
+        #main-map { height: 100vh; width: 100%; position: relative; }
+
+        /* الشريط العلوي للأزرار */
+        .top-bar { 
+            position: absolute; 
+            top: 15px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; 
+            gap: 8px; 
+            z-index: 1500; 
+            align-items: center; 
+            background: transparent; /* خلفية شفافة بالكامل */
+            padding: 8px 15px;
+            border-radius: 30px;
+            box-shadow: none; /* إزالة الظل */
+            width: auto;
+            max-width: 95%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .top-bar button, .edit-btn, #mapTypeSelect, .clear-btn, .change-creds-btn, .undo-btn, .finish-draw-btn {
+            background: #fff; border: 1px solid #2c3e50; color: #2c3e50;
+            border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: .3s;
+            white-space: nowrap;
+        }
+        .top-bar button:hover { background: #2c3e50; color: #fff; }
+        
+        /* زر إنهاء الرسم (يظهر أثناء الرسم فقط) */
+        .finish-draw-btn { background: #2ecc71 !important; color: white !important; border-color: #27ae60 !important; display: none; }
+
+        /* أزرار دائرية (رجوع + رئيسية) */
+        .map-circle-btn {
+            position: absolute;
+            right: 15px;
+            z-index: 1600;
+            background-color: #fff;
+            color: #1e3d6f;
+            border: 2px solid #1e3d6f;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .map-circle-btn:hover { transform: scale(1.1); background-color: #1e3d6f; color: white; }
+
+        #mapBackBtn { top: 70px; } /* زر السهم (رجوع للداخل) */
+        #externalHomeBtn { top: 120px; } /* زر المنزل (رابط خارجي) */
+
+        #exitMapBtn { background: #e74c3c !important; color: #fff !important; border-color: #e74c3c !important; }
+        .undo-btn { border-color: #c0392b; color: #c0392b; display: none; }
+        .undo-btn:hover { background: #c0392b; color: #fff; }
+
+        .legend { position: absolute; bottom: 60px; right: 10px; background: #fff; border: 1px solid #ccc;
+                border-radius: 6px; padding: 8px 10px; font-size: 12px; line-height: 1.6;
+                box-shadow: 0 1px 4px rgba(0,0,0,.25); z-index: 1000; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 3px; }
+        .legend-color { width: 14px; height: 14px; margin-left: 6px; border-radius: 2px; }
+
+        /* بطاقة خيارات المسؤول (وسيطة) */
+        .admin-action-card {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 2500;
+            display: none;
+            text-align: center;
+            min-width: 200px;
+        }
+        .admin-action-card h4 { margin: 0 0 10px 0; font-size: 14px; color: #1e3d6f; }
+        .admin-actions-grid { display: flex; gap: 10px; justify-content: center; }
+        .admin-actions-grid button { flex: 1; padding: 8px; border-radius: 5px; border: none; cursor: pointer; font-size: 12px; color: white; }
+        .btn-edit-data { background-color: #3498db; }
+        .btn-edit-shape { background-color: #e67e22; }
+        .close-action-card { position: absolute; top: -10px; right: -10px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; line-height: 20px; cursor: pointer; font-size: 12px; border: none;}
+
+        /* البطاقة العصرية (بيانات القطعة) */
+        .modern-land-card {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 280px;
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            font-family: 'Tajawal', sans-serif;
+            z-index: 2000;
+            display: none;
+            overflow: hidden;
+            direction: rtl;
+        }
+        .card-header-modern { padding: 15px 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+        .close-card-btn { background: none; border: none; font-size: 24px; color: #888; cursor: pointer; line-height: 1; }
+        .card-title-modern { font-weight: 800; font-size: 18px; color: #000; flex-grow: 1; text-align: center; }
+        .block-icon { width: 30px; opacity: 0.7; }
+        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; border-bottom: 1px solid #f0f0f0; }
+        .card-item { text-align: center; }
+        .card-label { font-size: 12px; color: #888; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .card-value { font-size: 16px; font-weight: bold; color: #333; }
+        .status-badge { background-color: #2ecc71; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; }
+        .price-section { padding: 15px; text-align: center; }
+        .price-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+        .price-value { font-size: 20px; font-weight: 800; color: #e67e22; }
+        .card-notes { font-size: 10px; color: #777; padding: 0 15px 10px; text-align: right; line-height: 1.6; }
+        .card-footer { padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .btn-reserve-modern { background-color: #a06e5a; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-weight: bold; font-size: 14px; flex-grow: 1; cursor: pointer; text-decoration: none; text-align: center; transition: background 0.2s; }
+        .btn-reserve-modern:hover { background-color: #8d5d4b; }
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #333; text-decoration: none; transition: background 0.2s; }
+        .icon-btn:hover { background-color: #e0e0e0; }
+
+        /* نوافذ الرسم والتعديل */
+        .draw-card, .edit-panel { 
+            position: absolute; 
+            top: 70px; 
+            right: 10px; 
+            width: 210px; 
+            background: rgba(255, 255, 255, 0.95); 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            padding: 10px; 
+            font-size: 11px; 
+            line-height: 1.4; 
+            box-shadow: 0 2px 8px rgba(0,0,0,.2); 
+            z-index: 1200; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            direction: rtl;
+        }
+        .draw-card { display: none; }
+        .edit-panel { display: none; }
+        
+        .draw-card .title, .edit-panel h5 { 
+            font-weight: 700; font-size: 13px; color: #1e3d6f;
+            text-align: center; padding-bottom: 5px; border-bottom: 1px solid #eee; margin: 0 0 8px 0;
+        }
+        
+        .draw-card .info-row, .edit-panel .form-group { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; border-bottom: 1px dashed #f0f0f0; 
+        }
+        
+        .edit-panel .form-group { display: block; margin-bottom: 5px; }
+        .edit-panel .form-group label { display: block; font-weight: bold; margin-bottom: 2px; font-size: 11px; }
+        
+        .edit-panel .form-group input, .draw-card .info-row input, .draw-card .info-row select, .edit-panel .form-group select { 
+            width: 100%; padding: 4px; font-size: 11px; border: 1px solid #bbb; border-radius: 4px; height: 24px; box-sizing: border-box;
+        }
+        .draw-card .info-row input, .draw-card .info-row select { width: 65%; }
+        
+        /* تنسيقات أرقام الأضلاع */
+        .edge-label { background: transparent; color: #222; font-size: 12px; font-weight: 800;
+            text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff, 1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;
+            white-space: nowrap; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .edge-text-wrapper { display: inline-block; padding: 0 2px; }
+
+        /* تنسيقات رقم القطعة في المنتصف */
+        .plot-number-label {
+            background: transparent;
+            border: none;
+            pointer-events: none; /* لضمان القدرة على الضغط على القطعة */
+        }
+        .plot-number-text {
+            color: #222;
+            font-size: 14px; /* حجم أساسي */
+            font-weight: 900;
+            text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff, 1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+            transition: transform 0.2s ease; /* تنعيم حركة التكبير والتصغير */
+        }
+        
+        .edges-inputs { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 5px 0; 
+            padding: 5px; border: 1px dashed #ccc; border-radius: 6px; background: rgba(250,250,250,0.5); 
+        }
+        .edge-input-group label { font-size: 10px; display: block; margin-bottom: 1px; }
+        .edge-input-group input { width: 100%; height: 22px; font-size: 11px; }
+
+        .vertex-marker { background: #fff; border: 3px solid #e74c3c; border-radius: 50%; cursor: move; box-shadow: 0 0 4px rgba(0,0,0,0.5); transition: transform 0.1s; }
+        .vertex-marker:hover { transform: scale(1.2); border-color: #c0392b; }
+
+        #landsListBtn { background: #fff; border: 1px solid #9b59b6; color: #9b59b6; }
+        #landsListModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 20000; align-items: center; justify-content: center; }
+        #landsListModal.active { display: flex; }
+        .lands-list-container { background-color: white; border-radius: 10px; width: 90%; max-width: 600px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+        .lands-list-header { background-color: #1e3d6f; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .land-item { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s;}
+        .land-item:hover { background-color: #f5f5f5; }
+        .land-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .land-name { font-weight: bold; color: #1e3d6f; }
+        .land-status.available { background-color: #2ecc71; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .land-status.reserved { background-color: #f1c40f; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .land-status.sold { background-color: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        .land-details { display: flex; gap: 10px; font-size: 12px; color: #666; }
+        
+        .color-picker { display: flex; gap: 6px; justify-content: center; margin: 4px 0; }
+        .color-picker label { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 2px #bbb; cursor: pointer; }
+        .color-picker input:checked+label { box-shadow: 0 0 0 3px #222; }
+        
+        .tab-pane { display: none; }
+        .tab-pane.w--tab-active { display: block; animation: fadeIn 0.4s; }
+        .tab-link-7.w--current, .tab-link-8.w--current, .tab-link-9.w--current, .tab-link-10.w--current {
+            background-color: #f0f0f0; border-bottom: 2px solid #1e3d6f;
+        }
+
+        #blocks-public-container { margin-top: 0; position: relative; z-index: 10; }
+
+        /* ============================================ */
+        /* تنسيقات الموبايل الهامة وتعديلات النوافذ     */
+        /* ============================================ */
+        @media (max-width: 768px) {
+            .top-bar { 
+                top: 10px; /* إزاحة للأعلى */
+                width: 95%; 
+                padding: 4px; 
+                gap: 3px;
+            }
+            .top-bar button, #mapTypeSelect, .finish-draw-btn { font-size: 10px; padding: 4px 8px; }
+            
+            /* تحريك زر الرجوع */
+            #mapBackBtn { 
+                width: 35px; height: 35px; font-size: 14px; 
+                top: 60px; /* أسفل التوب بار مباشرة */
+                right: 15px; 
+            }
+            /* تحريك زر الرئيسية */
+            #externalHomeBtn {
+                width: 35px; height: 35px; font-size: 14px;
+                top: 105px; /* أسفل زر الرجوع */
+                right: 15px;
+            }
+            
+            /* تصغير نافذة البطاقة للمشتري */
+            .modern-land-card { 
+                width: 95%; right: 2.5%; bottom: 10px; 
+                font-size: 12px;
+            }
+            
+            /* تصغير نوافذ التعديل والرسم لتناسب الهاتف */
+            .draw-card, .edit-panel { 
+                width: 85%; 
+                right: 7.5%; 
+                top: 90px; 
+                max-height: 65vh;
+            }
+            
+            #admin-wrapper .header { flex-direction: column; align-items: stretch; }
+            #admin-wrapper .nav-buttons { justify-content: space-between; }
+            #admin-wrapper .btn { flex-grow: 1; text-align: center; }
+            #admin-wrapper .tab { padding: 10px 15px; font-size: 13px; }
+        }
+
+        /* تنسيقات الصور الشفافة */
+        .overlay-img {
+            position: absolute;
+            z-index: 1000; /* فوق الخريطة وتحت الأدوات */
+            pointer-events: none; /* لا تتداخل مع Leaflet */
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.7); /* خلفية بيضاء شفافة */
+            padding: 4px;
+        }
+        #img1 {
+            top: 15px;
+            right: 15px;
+            width: 120px;
+        }
+        #img2 {
+            bottom: 60px;
+            left: 15px;
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="public-wrapper">
+    <section data-wf--variant="base" class="section-18">
+        <div class="w-layout-blockcontainer container-254 w-container">
+            <div class="w-layout-blockcontainer container-252 w-container">
+                <div class="w-layout-blockcontainer container-253 w-container">
+                    <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/6911cca17de8839abb005bf0_g20507.svg" loading="lazy" alt="" class="image-41"/>
+                </div>
+                <div class="w-layout-blockcontainer container-259 w-container">
+                    <!-- زر من نحن - تم التأكد من عمله (رابط anchor) -->
+                    <a href="#blocks-public-container" class="button-19map w-button">من نحن</a>
+                    <a href="#" id="publicMapLink" class="button-19map _1 w-button">الخريطة التفاعلية</a>
+                    <a href="https://wa.me/966508586688" class="button-19map w-button">اتصل بنا</a>
+                </div>
+            </div>
+        </div>
+        <div class="w-layout-blockcontainer container-257 w-container">
+            <h1 class="heading-16">استثمر في أرض اليوم ....<br />لتبني عليها غدا يليق بك</h1>
+        </div>
+        <div class="w-layout-blockcontainer container-255 w-container">
+            <!-- زر الملف التعريفي - تم التأكد من عمله (target=_blank) -->
+            <a href="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/69165306161373cc745f1a1e_Company%20Profile%20(interactive).pdf" target="_blank" class="grid-19 w-inline-block">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/6911bf0829286903107f9867_path20669.svg" loading="lazy" width="55" height="55" alt="" class="image-32"/>
+                <div class="text-block-99">الملف التعريفي</div>
+            </a>
+        </div>
+        <div class="w-layout-blockcontainer container-255 w-container">
+            <a href="#" id="publicMapBtn" class="grid-19 w-inline-block">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/69120440258b1fdc4ba67531_location-pin-svgrepo-com.svg" loading="lazy" width="50" height="55" alt="" class="image-32">
+                <div class="text-block-99">موقع المخطط على الخريطة</div>
+            </a>
+        </div>
+        <div class="w-layout-blockcontainer container-255 w-container">
+            <div id="showLoginBtn" class="grid-19 w-inline-block login-trigger-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/6911bf0829286903107f9867_path20669.svg" loading="lazy" width="55" height="55" alt="" class="image-32"/>
+                <div class="text-block-99" id="loginButtonText">تسجيل دخول مسؤول</div>
+            </div>
+        </div>
+        <div class="w-layout-blockcontainer container-255 w-container" id="logoutContainer" style="display: none;">
+            <div id="logoutBtnMain" class="grid-19 w-inline-block login-trigger-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/6911bf0829286903107f9867_path20669.svg" loading="lazy" width="55" height="55" alt="" class="image-32">
+                <div class="text-block-99" style="color: #e74c3c;">تسجيل الخروج</div>
+            </div>
+        </div>
+
+        <div class="w-layout-blockcontainer container-256 w-container">
+            <div class="w-layout-blockcontainer container-266 w-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691223a96fcc4b0107a7cff4_Group%2039647.svg" loading="lazy" width="52" alt="" class="image-38">
+                <div class="text-block-106">قطعة أرض</div>
+            </div>
+            <div class="w-layout-blockcontainer container-266 w-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691221c82478b61fd6945e05_Group%2039643.svg" loading="lazy" width="62" alt="" class="image-38">
+                <div class="text-block-106">مساحات متنوعة</div>
+            </div>
+            <div class="w-layout-blockcontainer container-266 w-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691221c82c1cf9f906422e3a_Group%2039644.svg" loading="lazy" width="56" alt="" class="image-38">
+                <div class="text-block-106">قطع بأكثر من واجهه</div>
+            </div>
+            <div class="w-layout-blockcontainer container-266 w-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691221c83057e66a62dca740_Group%2039645.svg" loading="lazy" width="51" alt="" class="image-38">
+                <div class="text-block-106">بيئة سكنية واعدة</div>
+            </div>
+            <div class="w-layout-blockcontainer container-266 w-container">
+                <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691221c808c0686e222e696f_Group%2039646.svg" loading="lazy" alt="" class="image-38">
+                <div class="text-block-106">موقع استراتيجي</div>
+            </div>
+        </div>
+    </section>
+
+    <div id="blocks-public-container"></div>
+
+    <section class="section-19">
+        <section class="section-20">
+            <a href="#" class="button-18 w-button">1</a>
+            <a href="#" class="button-40 _1 w-button">2</a>
+        </section>
+    </section>
+
+    <section data-wf--variant="base" class="footer-dark-2">
+        <div class="container-258">
+            <div class="w-layout-blockcontainer container-261 w-container">
+                <h1 class="heading-17">إطلالة على المستقبل</h1>
+                <h2 class="heading-17">بدأ البيع الأن, الإفراغ فوري</h2>
+            </div>
+            <div class="w-layout-blockcontainer container-260 w-container">
+                <div class="w-layout-blockcontainer container-262 w-container">
+                    <div class="text-block-101">050 858 6688</div>
+                    <div class="text-block-100">014 844 4455</div>
+                </div>
+                <div class="w-layout-blockcontainer container-263 w-container">
+                    <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691be97b21e2174f83fcccc6_g42%202%201w.svg" loading="lazy" width="543" height="55" alt="" class="image-35">
+                    <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/6911cca17de8839abb005bf0_g20507.svg" loading="lazy" alt="" class="image-34">
+                </div>
+            </div>
+            <div class="footer-divider-2"></div>
+            <div class="footer-copyright-center-2">Copyright © 2025 Zwayamadinaty</div>
+        </div>
+    </section>
+
+    <section class="section-13">
+        <div class="w-layout-blockcontainer container-245 w-container">
+            <div class="w-layout-blockcontainer container-297 w-container">
+                <a href="/" class="link-block-3 w-inline-block">
+                    <img src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/691be97b21e2174f83fcccc6_g42%202%201w.svg" loading="lazy" width="106" alt="" class="image-47">
+                </a>
+            </div>
+            <a href="https://wa.me/966508586688" class="button-13 w-button">
+                تواصل معنا
+                <strong class="bold-text-15">&#160;&#160;&#160;6688 858 050</strong>
+            </a>
+        </div>
+    </section>
+</div>
+
+<div id="admin-wrapper">
+    <div class="header">
+        <h1>لوحة التحكم - مخطط المشارف</h1>
+        <div class="nav-buttons">
+            <button class="btn btn-primary" id="addBlockBtn">إضافة بلوك جديد</button>
+            <button class="btn btn-success" id="settingsBtn">إعدادات المسؤول</button>
+            <button class="btn btn-info" id="openMapEditBtn">تعديل الخريطة</button>
+            <button class="btn btn-warning" id="backToMainBtn">العودة للصفحة الرئيسية</button>
+            <button class="btn btn-danger" onclick="logout()">خروج</button>
+        </div>
+    </div>
+    <div class="container"><div class="tabs" id="blocksTabs"></div><div id="blocksContent"></div></div>
+    
+    <div class="modal" id="plotModal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="plotModalTitle">إضافة قطعة أرض</h3>
+            <form id="plotForm">
+                <input type="hidden" id="plotId">
+                <input type="hidden" id="blockNumber">
+                <div class="form-group"><label class="form-label">رقم القطعة</label><input type="text" class="form-input" id="plotNumber" required></div>
+                <div class="form-group"><label class="form-label">النوع</label>
+                    <select class="form-input" id="plotType">
+                        <option value="مستكمل">مستكمل</option>
+                        <option value="غير مستكمل">غير مستكمل</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">المساحة (م²)</label><input type="number" step="0.01" class="form-input" id="area" required></div>
+                <div class="form-group"><label class="form-label">السعر</label><input type="number" class="form-input" id="price" required></div>
+                <div class="form-group"><label class="form-label">الحالة</label>
+                    <select class="form-input" id="status" required>
+                        <option value="متوفر">متوفر</option>
+                        <option value="محجوز">محجوز</option>
+                        <option value="تم البيع">تم البيع</option>
+                    </select>
+                </div>
+                <div class="form-group"><label class="form-label">رابط الواتساب</label><input type="text" class="form-input" id="plotWhatsapp" placeholder="https://wa.me/..."></div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-danger" id="cancelPlotBtn">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal" id="blockNameModal"><div class="modal-content"><form id="blockNameForm"><input type="hidden" id="editBlockKey"><div class="form-group"><input type="text" class="form-input" id="blockNameInput"></div><div class="form-buttons"><button type="button" class="btn btn-danger" id="cancelBlockNameBtn">إلغاء</button><button type="submit" class="btn btn-primary">حفظ</button></div></form></div></div>
+    <div class="modal" id="settingsModal"><div class="modal-content"><form id="adminSettingsForm"><div class="form-group"><label class="form-label">Admin</label></div><div class="form-group"><input type="password" class="form-input" id="newPassword" placeholder="كلمة المرور الجديدة"></div><div class="form-buttons"><button type="button" class="btn btn-danger" id="cancelSettingsBtn">إلغاء</button><button type="submit" class="btn btn-primary">حفظ</button></div></form></div></div>
+</div>
+
+<div id="map-wrapper">
+    <!-- زر العودة الداخلي (للسلايدر/الصفحة الرئيسية) -->
+    <a href="#" id="mapBackBtn" class="map-circle-btn" title="العودة"><i class="fas fa-arrow-right"></i></a>
+    
+    <!-- زر العودة للصفحة الرئيسية (رابط خارجي) -->
+    <a href="https://www.zwaya-madinaty.com/masharef" id="externalHomeBtn" class="map-circle-btn" title="الرئيسية"><i class="fas fa-home"></i></a>
+<!-- الصورة 1 (أعلى اليمين) -->
+<img src="file:///C:/مستقل/Screenshot%202025-11-26%20171405.png.jpeg"
+     alt="مخطط 1"
+     style="position:absolute; top:20px; right:20px; width:250px; z-index:1000; pointer-events:none;
+            filter:brightness(1.05) contrast(1.2); mix-blend-mode:multiply;">
+
+<!-- الصورة 2 البديلة (أسفل اليسار) – نفس الشكل -->
+<img src="C:\مستقل\WhatsApp Image 2025-11-29 at 7.02.14 AM.jpeg"
+     alt="مخطط بديل"
+     style="position:absolute; bottom:20px; left:20px; width:250px; z-index:1000; pointer-events:none;
+            filter:brightness(1.05) contrast(1.2); mix-blend-mode:multiply;">
+
+    <div id="main-map"></div>
+    <div class="top-bar">
+        <button id="landsListBtn"><i class="fas fa-list"></i> الأراضي</button>
+        <select id="mapTypeSelect">
+            <option value="osm">خريطة OSM</option>
+            <option value="sat_labels" selected>قمر صناعي</option> 
+        </select>
+        <button id="exitMapBtn" style="display:none;">لوحة التحكم</button> 
+        <button id="drawBoardBtn" style="display: none;">رسم قطعة</button> 
+        <button class="undo-btn" id="undoPointBtn" title="حذف آخر نقطة">تراجع</button>
+        <button class="finish-draw-btn" id="finishDrawingBtn" title="إنهاء الرسم وإدخال البيانات">إنهاء الرسم</button>
+        <button class="clear-btn" id="clearAllBtn" style="display: none;">مسح الكل</button>
+    </div>
+
+    <!-- نافذة خيارات المسؤول (عند الضغط على القطعة) -->
+    <div id="adminActionCard" class="admin-action-card">
+        <button class="close-action-card" id="closeActionCard">×</button>
+        <h4>خيارات القطعة</h4>
+        <div class="admin-actions-grid">
+            <button class="btn-edit-data" id="btnActionEditData">تعديل البيانات</button>
+            <button class="btn-edit-shape" id="btnActionEditShape">تعديل الرسم</button>
+        </div>
+    </div>
+
+    <!-- نافذة قائمة الأراضي -->
+    <div id="landsListModal">
+        <div class="lands-list-container">
+            <div class="lands-list-header"><h3>قائمة الأراضي</h3><button class="close-btn" id="closeLandsListModal" style="background:none;border:none;color:white;font-size:20px;">×</button></div>
+            <div class="lands-list-search" style="padding:10px;"><input type="text" id="landsSearchInput" placeholder="بحث..." style="width:100%;padding:8px;"></div>
+            <div class="lands-list-content" id="landsListContent" style="flex:1;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- مفتاح الخريطة -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#2ecc71"></div><span>متاحة</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:#f1c40f"></div><span>محجوزة</span></div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div><span>مباعة</span></div>
+    </div>
+
+    <!-- بطاقة البيانات الجديدة -->
+    <div id="modernLandCard" class="modern-land-card">
+        <div class="card-header-modern">
+            <button class="close-card-btn" id="closeModernCard">×</button>
+            <div class="card-title-modern">معلومات القطعة</div>
+            <div class="block-icon"><i class="fas fa-th-large"></i></div>
+        </div>
+        
+        <div class="card-grid">
+            <div class="card-item"><div class="card-label"> <i class="fas fa-hashtag"></i> رقم القطعة</div><div class="card-value" id="cardPiece">-</div></div>
+            <div class="card-item"><div class="card-label"> <i class="fas fa-vector-square"></i> النوع</div><div class="card-value" id="cardType">مستكملة</div></div>
+            <div class="card-item"><div class="card-label"> <i class="fas fa-expand"></i> المساحة</div><div class="card-value" id="cardArea">-</div></div>
+            <div class="card-item"><div class="card-label"> <i class="far fa-circle"></i> حالة العقار</div><div id="cardStatus" class="status-badge">متوفرة</div></div>
+        </div>
+
+        <div class="price-section">
+            <div class="price-label"><i class="fas fa-money-bill-wave"></i> السعر الإجمالي شامل الضريبة</div>
+            <div class="price-value" id="cardPrice">0 ريال</div>
+        </div>
+
+        <div class="card-notes">* السعر لا يشمل السعي<br>* البناء ٣ ادوار<br>* غير مستكمل: تعني انه لا يمكن إصدار رخصة على الأرض حتى يكتمل جزء التنظيم مع المطور الجار.</div>
+
+        <div class="card-footer">
+            <a href="#" target="_blank" id="cardReserveBtn" class="btn-reserve-modern">طلب حجز</a>
+            <a href="#" target="_blank" id="cardLocationBtn" class="icon-btn"><i class="fas fa-map-marker-alt"></i></a>
+            <a href="#" id="cardShareBtn" class="icon-btn"><i class="fas fa-share-alt"></i></a>
+        </div>
+    </div>
+
+    <!-- أدوات الرسم والتعديل -->
+    <div id="drawCard" class="draw-card">
+        <button class="close-draw" id="closeDrawCard" style="position:absolute;top:5px;left:5px;background:none;border:none;color:red;">×</button>
+        <div class="title">إضافة بيانات القطعة</div>
+        <div class="edges-inputs">
+            <div class="edge-input-group"><label>ض1</label><input type="number" id="edge1"></div>
+            <div class="edge-input-group"><label>ض2</label><input type="number" id="edge2"></div>
+            <div class="edge-input-group"><label>ض3</label><input type="number" id="edge3"></div>
+            <div class="edge-input-group"><label>ض4</label><input type="number" id="edge4"></div>
+        </div>
+        <div class="info-row"><span>الاسم</span><input id="drawName"></div>
+        <div class="info-row"><span>رقم القطعة</span><input id="drawPiece"></div>
+        <div class="info-row"><span>النوع</span>
+            <select id="drawType">
+                <option value="مستكمل">مستكمل</option>
+                <option value="غير مستكمل">غير مستكمل</option>
+            </select>
+        </div>
+        <div class="info-row"><span>البلوك</span><select id="drawBlock"></select></div>
+        <div class="info-row"><span>المساحة (م²)</span><input type="number" id="drawManualArea"></div>
+        <div class="info-row"><span>السعر</span><input id="drawPrice"></div>
+        <div class="info-row"><span>رابط الواتس</span><input type="text" id="drawWhatsapp" placeholder="https://..."></div>
+        <div class="info-row"><span>اللون</span>
+            <div class="color-picker">
+                <input type="radio" name="drawColor" value="#2ecc71" id="dGreen" checked><label for="dGreen" style="background:#2ecc71"></label>
+                <input type="radio" name="drawColor" value="#f1c40f" id="dYellow"><label for="dYellow" style="background:#f1c40f"></label>
+                <input type="radio" name="drawColor" value="#e74c3c" id="dRed"><label for="dRed" style="background:#e74c3c"></label>
+            </div>
+        </div>
+        <div class="actions-row">
+            <button class="btn-sm btn-save" id="btnSaveDraw" style="width:100%; margin-top:5px; padding:5px; background:#2196F3; color:white; border:none; border-radius:4px;">حفظ (وإضافة للجدول)</button>
+            <button class="btn-sm" id="btnShowEdges" style="width:100%; margin-top:5px; padding:5px; background:#3498db;color:#fff; border:none; border-radius:4px;">أظهر الأرقام</button>
+        </div>
+    </div>
+
+    <div id="editPanel" class="edit-panel">
+        <div class="header-row"><h5>تعديل قطعة</h5><button class="close-btn" id="closeEditPanel" style="position:absolute;top:5px;left:5px;background:none;border:none;color:red;">×</button></div>
+        <div class="form-group"><select id="selectLandToEdit"><option value="">-- اختر قطعة --</option></select></div>
+        <div class="form-group"><label>الاسم</label><input type="text" id="inpName"></div>
+        <div class="form-group"><label>الرقم</label><input type="text" id="inpPiece"></div>
+        <div class="form-group"><label>النوع</label>
+            <select id="inpType">
+                <option value="مستكمل">مستكمل</option>
+                <option value="غير مستكمل">غير مستكمل</option>
+            </select>
+        </div>
+        <div class="form-group"><label>البلوك</label><select id="inpBlock"></select></div>
+        <div class="form-group"><label>المساحة</label><input type="number" id="inpManualArea"></div>
+        <div class="form-group"><label>السعر</label><input type="number" id="inpPrice"></div>
+        <div class="form-group"><label>رابط الواتس</label><input type="text" id="inpWhatsapp"></div>
+        <div class="form-group"><label>أطوال الأضلاع</label>
+            <div class="edges-inputs">
+                <div class="edge-input-group"><input type="number" id="inpEdge1"></div>
+                <div class="edge-input-group"><input type="number" id="inpEdge2"></div>
+                <div class="edge-input-group"><input type="number" id="inpEdge3"></div>
+                <div class="edge-input-group"><input type="number" id="inpEdge4"></div>
+            </div>
+        </div>
+        <div class="form-group"><label>اللون</label>
+            <div class="color-picker">
+                <input type="radio" name="color" value="#2ecc71" id="cGreen"><label for="cGreen" style="background:#2ecc71"></label>
+                <input type="radio" name="color" value="#f1c40f" id="cYellow"><label for="cYellow" style="background:#f1c40f"></label>
+                <input type="radio" name="color" value="#e74c3c" id="cRed"><label for="cRed" style="background:#e74c3c"></label>
+            </div>
+        </div>
+        <button class="btn-sm btn-save" id="btnSaveEdit" style="width:100%; margin-top:5px; padding:8px; background:#ffc107; border:none; border-radius:4px;">حفظ التعديلات</button>
+        <button class="btn-sm btn-delete-land" id="btnDeleteLand" style="width:100%; margin-top:5px; padding:8px; background:#f44336; color:white; border:none; border-radius:4px;">حذف</button>
+    </div>
+</div>
+
+<div id="loginModalOverlay"><div class="login-box"><h2>تسجيل الدخول</h2><div id="loginError" style="color:red;display:none;">خطأ في البيانات</div><form id="loginForm"><input type="text" id="loginUser" required placeholder="User"><input type="password" id="loginPass" required placeholder="Pass"><button type="submit" style="width:100%;margin-top:10px;padding:10px;">دخول</button><button type="button" id="closeLoginBtn" style="width:100%;margin-top:5px;padding:5px;">إلغاء</button></form></div></div>
+
+<!-- مكتبات Webflow -->
+<script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=68f52bf5e72bf6e25555cf45" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://cdn.prod.website-files.com/68f52bf5e72bf6e25555cf45/js/webflow.0da0b3ba.bae7c56076c439c6.js" type="text/javascript"></script>
+
+<script>
+    /* ================================================= */
+    /* منطق الخريطة (Leaflet) */
+    /* ================================================= */
+    let lands = JSON.parse(localStorage.getItem('myLands')) || [];
+    let isMapAdminMode = false;
+    let plotNumberMarkers = []; // لتخزين ماركرات أرقام القطع
+
+    const map = L.map('main-map', {
+        center: [24.4139444, 39.6897222],
+        zoom: 17,
+        maxZoom: 22,
+        zoomControl: false 
+    });
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, maxZoom: 22 });
+    const satImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxNativeZoom: 18, maxZoom: 22 });
+    const streetLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 22 });
+    
+    const satLabelsLayer = L.layerGroup([satImagery, streetLabels]);
+    let activeLayer = satLabelsLayer;
+    map.addLayer(activeLayer);
+
+    document.getElementById('mapTypeSelect').addEventListener('change', function () {
+        map.removeLayer(activeLayer);
+        activeLayer = (this.value === 'sat_labels') ? satLabelsLayer : osmLayer;
+        map.addLayer(activeLayer);
+        drawnItems.bringToFront();
+    });
+
+    function calculateArea(coords) {
+        if (coords.length < 3) return 0;
+        let area = 0; const radius = 6378137.0;
+        for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+            const p1 = coords[i], p2 = coords[j];
+            const y1 = p1[0] * (Math.PI / 180), y2 = p2[0] * (Math.PI / 180);
+            const x1 = p1[1] * (Math.PI / 180), x2 = p2[1] * (Math.PI / 180);
+            area += (x2 - x1) * (2 + Math.sin(y1) + Math.sin(y2));
+        }
+        return Math.abs(area * radius * radius / 2).toFixed(2);
+    }
+    function saveLands() { localStorage.setItem('myLands', JSON.stringify(lands)); }
+
+    let drawnItems = L.featureGroup().addTo(map);
+    let layerMap = {};
+
+    // متغير لتخزين القطعة المحددة مؤقتاً
+    let tempSelectedLandForAdmin = null;
+
+    function drawLand(land) {
+        const polygon = L.polygon(land.coords, { 
+            color: land.color || '#2ecc71', 
+            fillColor: land.color || '#2ecc71', 
+            fillOpacity: 0.4, 
+            weight: 2 
+        });
+        
+        polygon.bindTooltip("", {permanent: false, opacity: 0});
+        polygon.unbindTooltip();
+
+        // منطق النقر على الأرض (مسؤول vs مشتري)
+        polygon.on('click', function (e) { 
+            L.DomEvent.stopPropagation(e); 
+            if (drawMode) return; 
+
+            if (isMapAdminMode) {
+                // المسؤول: فتح البطاقة الوسيطة
+                tempSelectedLandForAdmin = land;
+                // إخفاء أي نوافذ أخرى
+                document.getElementById('modernLandCard').style.display = 'none';
+                document.getElementById('editPanel').style.display = 'none';
+                
+                // عرض بطاقة الإجراءات (تعديل البيانات / الرسم)
+                const adminCard = document.getElementById('adminActionCard');
+                adminCard.style.display = 'block';
+            } else {
+                // المشتري: عرض البطاقة فقط
+                map.fitBounds(e.target.getBounds(), { padding: [50, 50] }); 
+                showViewCard(land); 
+                showAllEdgeNumbers(land);
+                document.getElementById('editPanel').style.display = 'none';
+                document.getElementById('adminActionCard').style.display = 'none';
+            }
+        });
+        
+        polygon.addTo(drawnItems); 
+        polygon.landId = land.id;
+        layerMap[land.id] = polygon; 
+    }
+    
+    // دالة لرسم أرقام القطع في المنتصف
+    function renderPlotNumbers() {
+        // إزالة الماركرات القديمة
+        plotNumberMarkers.forEach(m => map.removeLayer(m));
+        plotNumberMarkers = [];
+
+        lands.forEach(land => {
+            if (!land.piece) return;
+
+            // حساب المنتصف (Centroid)
+            let latSum = 0, lngSum = 0, len = land.coords.length;
+            if (len === 0) return;
+            land.coords.forEach(c => { latSum += c[0]; lngSum += c[1]; });
+            let center = [latSum / len, lngSum / len];
+
+            // إنشاء أيقونة DivIcon
+            let icon = L.divIcon({
+                className: 'plot-number-label',
+                html: `<div class="plot-number-text">${land.piece}</div>`,
+                iconSize: [40, 20], // حجم الحاوية
+                iconAnchor: [20, 10] // توسيط الأيقونة
+            });
+
+            let marker = L.marker(center, { icon: icon, interactive: false }).addTo(map);
+            plotNumberMarkers.push(marker);
+        });
+        updatePlotNumberSize(); // ضبط الحجم المبدئي
+    }
+
+    // دالة لتحديث حجم الرقم بناءً على الزووم
+    function updatePlotNumberSize() {
+        const zoom = map.getZoom();
+        // معادلة لتصغير الحجم كلما ابتعدنا (Zoom Out)
+        // عند زووم 19 يكون الحجم الطبيعي (scale 1)
+        // عند زووم أقل يقل الـ scale
+        let baseZoom = 19;
+        let scale = Math.max(0.4, Math.pow(1.3, zoom - baseZoom)); 
+        
+        const labels = document.querySelectorAll('.plot-number-text');
+        labels.forEach(el => {
+            el.style.transform = `scale(${scale})`;
+        });
+    }
+
+    // ربط حدث الزووم
+    map.on('zoomend', updatePlotNumberSize);
+
+    function renderAllMapLands() { 
+        drawnItems.clearLayers(); 
+        layerMap = {};
+        lands.forEach(drawLand); 
+        renderPlotNumbers(); // رسم أرقام القطع
+        populateEditDropdown(); 
+        renderLandsList(); 
+    }
+    
+    // --- منطق أزرار نافذة المسؤول (Action Card) ---
+    document.getElementById('closeActionCard').onclick = () => {
+        document.getElementById('adminActionCard').style.display = 'none';
+        tempSelectedLandForAdmin = null;
+    };
+
+    document.getElementById('btnActionEditData').onclick = () => {
+        if(tempSelectedLandForAdmin) {
+            document.getElementById('adminActionCard').style.display = 'none';
+            populateEditDropdown();
+            selectLandToEdit.value = tempSelectedLandForAdmin.id;
+            selectLandToEdit.dispatchEvent(new Event('change'));
+            document.getElementById('editPanel').style.display = 'block';
+            clearVertexMarkers(); // تأكد من عدم وجود نقاط سحب
+        }
+    };
+
+    document.getElementById('btnActionEditShape').onclick = () => {
+        if(tempSelectedLandForAdmin) {
+            document.getElementById('adminActionCard').style.display = 'none';
+            populateEditDropdown();
+            selectLandToEdit.value = tempSelectedLandForAdmin.id;
+            selectLandToEdit.dispatchEvent(new Event('change'));
+            document.getElementById('editPanel').style.display = 'none'; // لا نظهر نافذة البيانات الآن
+            enableVertexEditing(tempSelectedLandForAdmin); // فقط نمكن الرسم
+            alert("يمكنك الآن سحب نقاط الأرض لتعديل شكلها. بعد الانتهاء، افتح 'تعديل البيانات' للحفظ.");
+        }
+    };
+
+    
+    function showViewCard(land) {
+        document.getElementById('cardPiece').textContent = land.piece || '-';
+        document.getElementById('cardType').textContent = land.type || 'مستكمل'; 
+        
+        let displayArea = land.manualArea ? land.manualArea : calculateArea(land.coords);
+        document.getElementById('cardArea').innerHTML = displayArea + ' م<sup>2</sup>';
+        
+        document.getElementById('cardPrice').textContent = (land.price || 0).toLocaleString() + ' ريال';
+        
+        const statusEl = document.getElementById('cardStatus');
+        if(land.color === '#e74c3c') { statusEl.textContent = 'مباعة'; statusEl.style.backgroundColor = '#e74c3c'; }
+        else if(land.color === '#f1c40f') { statusEl.textContent = 'محجوزة'; statusEl.style.backgroundColor = '#f1c40f'; }
+        else { statusEl.textContent = 'متوفرة'; statusEl.style.backgroundColor = '#2ecc71'; }
+        
+        // استخدام الرابط المخزن أو رقم افتراضي إذا لم يوجد رابط
+        const reserveBtn = document.getElementById('cardReserveBtn');
+        if (land.whatsapp && land.whatsapp.trim() !== "") {
+            reserveBtn.href = land.whatsapp;
+        } else {
+            // رابط احتياطي في حال عدم إدخال رابط
+            reserveBtn.href = `https://wa.me/966508586688`; 
+        }
+        
+        const centerLat = land.coords.map(c => c[0]).reduce((a, b) => a + b, 0) / land.coords.length; 
+        const centerLng = land.coords.map(c => c[1]).reduce((a, b) => a + b, 0) / land.coords.length;
+        document.getElementById('cardLocationBtn').href = `https://maps.google.com/?q=${centerLat},${centerLng}`;
+        
+        document.getElementById('modernLandCard').style.display = 'block';
+    }
+    
+    document.getElementById('closeModernCard').onclick = () => { document.getElementById('modernLandCard').style.display = 'none'; clearEdgeNumbers(); };
+
+    // --- قائمة الأراضي ---
+    function renderLandsList() {
+        const container = document.getElementById('landsListContent');
+        if (lands.length === 0) {
+            container.innerHTML = '<div style="padding:20px;text-align:center;color:#777;">لا توجد قطع أرض مسجلة</div>';
+            return;
+        }
+        let html = '';
+        lands.forEach(land => {
+            const area = land.manualArea ? land.manualArea : calculateArea(land.coords);
+            let statusClass = 'available', statusText = 'متوفرة';
+            if (land.color === '#f1c40f') { statusClass = 'reserved'; statusText = 'محجوزة'; }
+            else if (land.color === '#e74c3c') { statusClass = 'sold'; statusText = 'مباعة'; }
+            
+            html += `
+            <div class="land-item" data-land-id="${land.id}">
+                <div class="land-item-header">
+                    <div class="land-name">${land.name || 'بدون اسم'}</div>
+                    <div class="land-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="land-details">
+                    <span><i class="fas fa-hashtag"></i> قطعة ${land.piece || '-'}</span>
+                    <span><i class="fas fa-vector-square"></i> ${area} م²</span>
+                    <span><i class="fas fa-money-bill-wave"></i> ${(land.price || 0).toLocaleString()}</span>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+        
+        document.querySelectorAll('.land-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const landId = parseInt(this.getAttribute('data-land-id'));
+                const selectedLand = lands.find(l => l.id === landId);
+                if (selectedLand) {
+                    document.getElementById('landsListModal').classList.remove('active');
+                    const poly = layerMap[landId];
+                    if (poly) map.fitBounds(poly.getBounds(), { padding: [50, 50] });
+                    showViewCard(selectedLand);
+                    showAllEdgeNumbers(selectedLand);
+                }
+            });
+        });
+    }
+
+    document.getElementById('landsListBtn').addEventListener('click', function() {
+        renderLandsList();
+        document.getElementById('landsListModal').classList.add('active');
+        document.getElementById('landsSearchInput').value = '';
+        document.getElementById('landsSearchInput').focus();
+    });
+    
+    document.getElementById('closeLandsListModal').addEventListener('click', function() {
+        document.getElementById('landsListModal').classList.remove('active');
+    });
+
+    document.getElementById('landsSearchInput').addEventListener('input', function() {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('.land-item').forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(term) ? 'block' : 'none';
+        });
+    });
+
+    // --- منطق الرسم والتعديل ---
+    let currentEdgeNumbers = [];
+    function clearEdgeNumbers() { currentEdgeNumbers.forEach(m => map.removeLayer(m)); currentEdgeNumbers = []; }
+    
+    function showAllEdgeNumbers(land) {
+        clearEdgeNumbers();
+        if (!land.edges || land.edges.length === 0) return;
+        land.edges.forEach((len, idx) => {
+            if (!len) return;
+            const p1 = land.coords[idx];
+            const p2 = land.coords[(idx + 1) % land.coords.length];
+            const midLat = (p1[0] + p2[0]) / 2;
+            const midLng = (p1[1] + p2[1]) / 2;
+            const dy = p2[0] - p1[0];
+            const dx = p2[1] - p1[1];
+            let angleDeg = Math.atan2(dy, dx * Math.cos(midLat * Math.PI / 180)) * (180 / Math.PI);
+            let rotation = -angleDeg; 
+            if (angleDeg > 90 || angleDeg < -90) rotation += 180;
+
+            const marker = L.marker([midLat, midLng], {
+                icon: L.divIcon({
+                    className: 'edge-label',
+                    html: `<div style="transform: rotate(${rotation}deg);" class="edge-text-wrapper">← ${len} م →</div>`,
+                    iconSize: [120, 20],
+                    iconAnchor: [60, 10]
+                })
+            }).addTo(map);
+            currentEdgeNumbers.push(marker);
+        });
+    }
+
+    let drawMode = false, newPolygon = null, newCoords = [];
+    let drawingMarkers = []; // لتخزين نقاط السحب أثناء الرسم
+
+    // دالة لإزالة نقاط الرسم المؤقتة
+    function clearDrawingMarkers() {
+        drawingMarkers.forEach(m => map.removeLayer(m));
+        drawingMarkers = [];
+    }
+
+    map.on('click', function (e) { 
+        if (drawMode) {
+            const newPoint = [e.latlng.lat, e.latlng.lng];
+            newCoords.push(newPoint);
+            
+            // إضافة ماركر قابل للسحب لهذه النقطة
+            const markerIndex = newCoords.length - 1;
+            const marker = L.marker(newPoint, {
+                draggable: true,
+                icon: L.divIcon({ className: 'vertex-marker', iconSize: [15, 15], iconAnchor: [7, 7] })
+            }).addTo(map);
+
+            marker.on('drag', function(dragEvent) {
+                // تحديث الإحداثيات عند السحب
+                newCoords[markerIndex] = [dragEvent.latlng.lat, dragEvent.latlng.lng];
+                redrawTempPolygon();
+            });
+
+            drawingMarkers.push(marker);
+            redrawTempPolygon();
+        } else {
+            document.getElementById('modernLandCard').style.display = 'none';
+            clearEdgeNumbers();
+            clearVertexMarkers();
+            if(document.getElementById('adminActionCard')) document.getElementById('adminActionCard').style.display = 'none';
+        }
+    });
+
+    function redrawTempPolygon() {
+        if (newPolygon) map.removeLayer(newPolygon); 
+        if (newCoords.length > 0) {
+            newPolygon = L.polygon(newCoords, { color: '#2ecc71', fillColor: '#2ecc71', fillOpacity: 0.5, weight: 2 }).addTo(map);
+        }
+    }
+
+    document.getElementById('undoPointBtn').onclick = function() {
+        if(newCoords.length > 0) { 
+            newCoords.pop(); 
+            // حذف آخر ماركر
+            const lastMarker = drawingMarkers.pop();
+            if(lastMarker) map.removeLayer(lastMarker);
+            redrawTempPolygon(); 
+        }
+    };
+
+    function populateBlockDropdowns() {
+        const drawSelect = document.getElementById('drawBlock');
+        const editSelect = document.getElementById('inpBlock');
+        drawSelect.innerHTML = '';
+        editSelect.innerHTML = '';
+        
+        const keys = Object.keys(blocksData);
+        if(keys.length === 0) {
+            const opt = new Option("لا توجد بلوكات", "");
+            drawSelect.add(opt);
+            editSelect.add(opt.cloneNode(true));
+        } else {
+            keys.forEach(key => {
+                const blockName = blocksData[key].name;
+                const opt1 = new Option(blockName, key);
+                const opt2 = new Option(blockName, key);
+                drawSelect.add(opt1);
+                editSelect.add(opt2);
+            });
+        }
+    }
+
+    // عند الضغط على "رسم قطعة"
+    document.getElementById('drawBoardBtn').onclick = () => { 
+        drawMode = true; newCoords = []; 
+        if (newPolygon) map.removeLayer(newPolygon); newPolygon = null; 
+        clearEdgeNumbers(); 
+        clearDrawingMarkers();
+        
+        // إخفاء النافذة الكاملة
+        document.getElementById('drawCard').style.display = 'none'; 
+        
+        // إظهار أزرار التحكم بالرسم
+        document.getElementById('undoPointBtn').style.display = 'inline-block';
+        document.getElementById('finishDrawingBtn').style.display = 'inline-block';
+        
+        populateBlockDropdowns();
+        ['edge1','edge2','edge3','edge4','drawName','drawPiece','drawPrice','drawManualArea','drawWhatsapp'].forEach(id => document.getElementById(id).value = ''); 
+    };
+    
+    // عند الضغط على "إنهاء الرسم"
+    document.getElementById('finishDrawingBtn').onclick = () => {
+        if (newCoords.length < 3) {
+            alert("يجب رسم 3 نقاط على الأقل.");
+            return;
+        }
+        // إخفاء زر الإنهاء وإظهار نافذة البيانات
+        document.getElementById('finishDrawingBtn').style.display = 'none';
+        document.getElementById('undoPointBtn').style.display = 'none';
+        document.getElementById('drawCard').style.display = 'block';
+        
+        // حساب المساحة التقريبية
+        let calcArea = calculateArea(newCoords);
+        document.getElementById('drawManualArea').value = calcArea;
+    };
+    
+    document.getElementById('closeDrawCard').onclick = () => { 
+        drawMode = false; 
+        if (newPolygon) map.removeLayer(newPolygon); newPolygon = null; newCoords = []; 
+        clearDrawingMarkers();
+        document.getElementById('drawCard').style.display = 'none'; 
+        document.getElementById('undoPointBtn').style.display = 'none';
+        document.getElementById('finishDrawingBtn').style.display = 'none';
+    };
+
+    // حفظ البيانات في جدول البلوكات تلقائياً
+    document.getElementById('btnSaveDraw').onclick = () => { 
+        if (newCoords.length < 3) { alert('يجب رسم 3 نقاط على الأقل'); return; } 
+        const edges = [1,2,3,4].map(i => document.getElementById('edge'+i).value.trim()); 
+        
+        const selectedBlockKey = document.getElementById('drawBlock').value;
+        const selectedBlockName = blocksData[selectedBlockKey] ? blocksData[selectedBlockKey].name : selectedBlockKey;
+
+        const price = parseFloat(document.getElementById('drawPrice').value) || 0;
+        const manualArea = document.getElementById('drawManualArea').value.trim();
+        const plotNumber = document.getElementById('drawPiece').value.trim();
+        const whatsapp = document.getElementById('drawWhatsapp').value.trim();
+        const type = document.getElementById('drawType').value;
+        const color = document.querySelector('input[name="drawColor"]:checked').value;
+        const landId = Date.now();
+
+        const newLand = { 
+            id: landId, 
+            name: document.getElementById('drawName').value.trim(), 
+            piece: plotNumber, 
+            block: selectedBlockName, 
+            price: price, 
+            manualArea: manualArea, 
+            whatsapp: whatsapp,
+            type: type,
+            edges: edges, 
+            color: color, 
+            coords: newCoords 
+        }; 
+        lands.push(newLand); 
+        saveLands(); 
+        
+        // إضافة القطعة لجدول البلوك تلقائياً
+        if(selectedBlockKey && blocksData[selectedBlockKey]) {
+            let statusText = 'متوفر';
+            if(color === '#f1c40f') statusText = 'محجوز';
+            if(color === '#e74c3c') statusText = 'تم البيع';
+
+            const newTablePlot = {
+                id: landId,
+                plotNumber: plotNumber,
+                area: parseFloat(manualArea) || 0,
+                price: price,
+                status: statusText,
+                type: type,
+                whatsapp: whatsapp
+            };
+            blocksData[selectedBlockKey].plots.push(newTablePlot);
+            saveBlocksData();
+            renderPublicView(); // تحديث الصفحة الرئيسية
+        }
+
+        renderAllMapLands(); 
+        document.getElementById('drawCard').style.display = 'none'; 
+        drawMode = false; 
+        document.getElementById('undoPointBtn').style.display = 'none';
+        document.getElementById('finishDrawingBtn').style.display = 'none';
+        if (newPolygon) map.removeLayer(newPolygon); newPolygon = null; newCoords = []; 
+        clearDrawingMarkers();
+        alert('تم الحفظ وإضافة القطعة للجدول'); 
+    };
+
+    document.getElementById('btnShowEdges').onclick = () => { 
+        if (newCoords.length < 2) return; 
+        showAllEdgeNumbers({ coords: newCoords, edges: [1,2,3,4].map(i => document.getElementById('edge'+i).value.trim()) }); 
+    };
+    
+    let selectedLand = null; 
+    let vertexMarkers = [];
+    function clearVertexMarkers() { vertexMarkers.forEach(m => map.removeLayer(m)); vertexMarkers = []; }
+
+    function enableVertexEditing(land) {
+        clearVertexMarkers();
+        let polygonLayer = layerMap[land.id];
+        if (!polygonLayer) return;
+        land.coords.forEach((latlng, index) => {
+            const marker = L.marker(latlng, {
+                draggable: true,
+                icon: L.divIcon({ className: 'vertex-marker', iconSize: [20, 20], iconAnchor: [10, 10] })
+            }).addTo(map);
+            marker.on('drag', function(e) {
+                const newPos = e.latlng;
+                land.coords[index] = [newPos.lat, newPos.lng];
+                polygonLayer.setLatLngs(land.coords);
+                showAllEdgeNumbers(land); 
+            });
+            vertexMarkers.push(marker);
+        });
+    }
+
+    const selectLandToEdit = document.getElementById('selectLandToEdit');
+    function populateEditDropdown() { 
+        selectLandToEdit.innerHTML = '<option value="">-- اختر قطعة --</option>'; 
+        lands.forEach(land => { 
+            const option = document.createElement('option'); 
+            option.value = land.id; option.textContent = `${land.name} - ${land.piece}`; 
+            selectLandToEdit.appendChild(option); 
+        }); 
+    }
+    
+    document.getElementById('closeEditPanel').onclick = () => { document.getElementById('editPanel').style.display = 'none'; clearEdgeNumbers(); clearVertexMarkers(); };
+
+    selectLandToEdit.onchange = function() { 
+        selectedLand = lands.find(l => l.id == this.value); 
+        if (selectedLand) { 
+            document.getElementById('inpName').value = selectedLand.name || ''; 
+            document.getElementById('inpPiece').value = selectedLand.piece || ''; 
+            document.getElementById('inpType').value = selectedLand.type || 'مستكمل'; 
+            
+            // تحديد البلوك في القائمة
+            const blockSelect = document.getElementById('inpBlock');
+            let foundKey = "";
+            Object.keys(blocksData).forEach(k => {
+                if(blocksData[k].name === selectedLand.block) foundKey = k;
+            });
+            blockSelect.value = foundKey;
+
+            document.getElementById('inpManualArea').value = selectedLand.manualArea || ''; 
+            document.getElementById('inpPrice').value = selectedLand.price || ''; 
+            document.getElementById('inpWhatsapp').value = selectedLand.whatsapp || ''; 
+            const edges = selectedLand.edges || ['', '', '', '']; 
+            ['inpEdge1','inpEdge2','inpEdge3','inpEdge4'].forEach((id, i) => document.getElementById(id).value = edges[i] || ''); 
+            document.querySelectorAll('input[name="color"]').forEach(r => r.checked = r.value === selectedLand.color);
+            const polygon = layerMap[selectedLand.id];
+            if(polygon) map.fitBounds(polygon.getBounds(), {padding: [50,50]});
+        } else { clearVertexMarkers(); }
+    };
+
+    // تحديث بيانات الجدول عند التعديل
+    document.getElementById('btnSaveEdit').onclick = function() { 
+        if (!selectedLand) return; 
+        
+        selectedLand.name = document.getElementById('inpName').value.trim(); 
+        selectedLand.piece = document.getElementById('inpPiece').value.trim(); 
+        selectedLand.type = document.getElementById('inpType').value;
+        
+        // الحصول على البلوك الجديد
+        const selBlockKey = document.getElementById('inpBlock').value;
+        
+        selectedLand.block = blocksData[selBlockKey] ? blocksData[selBlockKey].name : "";
+        selectedLand.manualArea = document.getElementById('inpManualArea').value.trim();
+        selectedLand.price = parseFloat(document.getElementById('inpPrice').value) || 0; 
+        selectedLand.whatsapp = document.getElementById('inpWhatsapp').value.trim(); 
+        selectedLand.edges = [1,2,3,4].map(i => document.getElementById('inpEdge'+i).value.trim()); 
+        selectedLand.color = document.querySelector('input[name="color"]:checked').value; 
+        
+        saveLands(); 
+        renderAllMapLands(); 
+        clearVertexMarkers(); 
+        
+        // تحديث الجدول الرئيسي
+        let statusText = 'متوفر';
+        if(selectedLand.color === '#f1c40f') statusText = 'محجوز';
+        if(selectedLand.color === '#e74c3c') statusText = 'تم البيع';
+
+        // حذف القطعة من جميع البلوكات
+        Object.keys(blocksData).forEach(k => {
+            blocksData[k].plots = blocksData[k].plots.filter(p => p.id !== selectedLand.id);
+        });
+
+        // إضافتها للبلوك الجديد المختار
+        if(selBlockKey && blocksData[selBlockKey]) {
+            blocksData[selBlockKey].plots.push({
+                id: selectedLand.id,
+                plotNumber: selectedLand.piece,
+                area: parseFloat(selectedLand.manualArea) || 0,
+                price: selectedLand.price,
+                status: statusText,
+                type: selectedLand.type,
+                whatsapp: selectedLand.whatsapp
+            });
+        }
+        saveBlocksData();
+        renderPublicView();
+
+        document.getElementById('editPanel').style.display = 'none'; 
+        alert('تم التعديل وحفظ النقاط الجديدة وتحديث الجدول'); 
+    };
+
+    document.getElementById('btnDeleteLand').onclick = function() { 
+        if (!selectedLand) return; 
+        if (confirm('حذف القطعة من الخريطة والجدول؟')) { 
+            // حذف من الخريطة
+            lands = lands.filter(l => l.id != selectedLand.id); 
+            saveLands(); 
+            
+            // حذف من الجدول
+            Object.keys(blocksData).forEach(k => {
+                blocksData[k].plots = blocksData[k].plots.filter(p => p.id !== selectedLand.id);
+            });
+            saveBlocksData();
+            renderPublicView();
+
+            renderAllMapLands(); 
+            clearVertexMarkers(); 
+            document.getElementById('editPanel').style.display = 'none'; 
+        } 
+    };
+    document.getElementById('clearAllBtn').onclick = function() { if (confirm('مسح الكل؟')) { lands = []; saveLands(); renderAllMapLands(); } };
+
+    // --- إدارة التنقل ومنطق البلوكات والصفحة الرئيسية ---
+
+    let blocksData = JSON.parse(localStorage.getItem('blocksData')) || {};
+    // تأكد من وجود بلوك واحد على الأقل إذا كان فارغاً
+    if (Object.keys(blocksData).length === 0) {
+        blocksData = {
+            block1: { name: "بلوك 1", plots: [] }
+        };
+        localStorage.setItem('blocksData', JSON.stringify(blocksData));
+    }
+
+    function saveBlocksData() { localStorage.setItem('blocksData', JSON.stringify(blocksData)); }
+
+    // دالة لعرض البلوكات في الصفحة الرئيسية للمشتري
+    function renderPublicView() {
+        const container = document.getElementById('blocks-public-container');
+        container.innerHTML = ''; 
+        
+        Object.keys(blocksData).forEach((blockKey) => {
+            const block = blocksData[blockKey];
+            container.innerHTML += `
+            <section class="section-7" id="${blockKey}-section">
+                <h1 class="bluk">${block.name}</h1>
+                <div data-current="الكل" class="tabs-2 w-tabs block-tabs-wrapper">
+                    <div class="tabs-menu-2 w-tab-menu">
+                        <a href="javascript:void(0)" data-w-tab="الكل" class="tab-link-7 w-inline-block w-tab-link w--current"><div class="text-block-72">الكل</div></a>
+                        <a href="javascript:void(0)" data-w-tab="المتوفر فقط" class="tab-link-8 w-inline-block w-tab-link"><div class="text-block-73">المتوفر فقط</div></a>
+                        <a href="javascript:void(0)" data-w-tab="تم البيع" class="tab-link-9 w-inline-block w-tab-link"><div>تم البيع</div></a>
+                        <a href="javascript:void(0)" data-w-tab="محجوز" class="tab-link-10 w-inline-block w-tab-link"><div>محجوز</div></a>
+                    </div>
+                    <div class="tabs-content w-tab-content">
+                        ${renderPublicTabContent(block.plots, 'الكل')}
+                        ${renderPublicTabContent(block.plots, 'المتوفر فقط')}
+                        ${renderPublicTabContent(block.plots, 'تم البيع')}
+                        ${renderPublicTabContent(block.plots, 'محجوز')}
+                    </div>
+                </div>
+                <div class="text-block-87">* السعر لا يشمل السعي.<br />* البناء ٣ ادوار.<br />* غير مستكمل: تعني انه لا يمكن إصدار رخصة على الأرض حتى يكتمل جزء التنظيم مع المطور الجار.</div>
+            </section>`;
+        });
+        
+        initCustomTabs();
+    }
+
+    function renderPublicTabContent(plots, filterType) {
+        let filtered = plots;
+        if (filterType === 'المتوفر فقط') filtered = plots.filter(p => p.status === 'متوفر');
+        if (filterType === 'تم البيع') filtered = plots.filter(p => p.status === 'تم البيع');
+        if (filterType === 'محجوز') filtered = plots.filter(p => p.status === 'محجوز');
+
+        const activeClass = filterType === 'الكل' ? 'w--tab-active' : '';
+        const displayStyle = filterType === 'الكل' ? 'block' : 'none';
+        
+        if (filtered.length === 0) return `<div data-w-tab="${filterType}" class="tab-pane w-tab-pane ${activeClass}" style="display:${displayStyle}"><div class="w-dyn-empty" style="padding:20px;text-align:center;">لا توجد قطع.</div></div>`;
+
+        let listHTML = filtered.map(plot => {
+            let btnHTML = '';
+            // تحديد رابط الواتس: إذا وجد رابط خاص استخدمه، وإلا استخدم العام
+            let whatsappLink = plot.whatsapp && plot.whatsapp.trim() !== '' ? plot.whatsapp : 'https://wa.me/966508586688';
+
+            if (plot.status === 'متوفر') {
+                btnHTML = `<a href="${whatsappLink}" class="button-14 w-button">احجز</a>`;
+            } else {
+                btnHTML = `<div class="text-block-83">${plot.status}</div>`;
+            }
+
+            return `
+            <div role="listitem" class="collection-item-4 w-dyn-item">
+                <div class="w-layout-grid grid-11">
+                    <div class="w-layout-blockcontainer container-234 w-container">
+                        <div class="text-block-62">${plot.plotNumber}</div>
+                        <div class="text-block-54">${plot.type || 'مستكمل'}</div>
+                    </div>
+                    <div class="text-block-55">${plot.area}</div>
+                    <div class="text-block-59">${(plot.price || 0).toLocaleString()}</div>
+                    <div class="w-layout-blockcontainer container-235 w-container">${btnHTML}</div>
+                </div>
+            </div>`;
+        }).join('');
+
+        return `<div data-w-tab="${filterType}" class="tab-pane w-tab-pane ${activeClass}" style="display:${displayStyle}">
+            <div class="w-layout-blockcontainer container-222 w-container">
+                <div class="w-layout-grid grid-12">
+                    <div class="text-block-71">رقم القطعة</div>
+                    <div class="text-block-64">المساحة</div>
+                    <div class="text-block-68">السعر شامل الضريبة</div>
+                    <div class="text-block-82">للحجز</div>
+                </div>
+                <div class="collection-list-wrapper-6 w-dyn-list"><div role="list" class="collection-list-6 w-dyn-items">${listHTML}</div></div>
+            </div>
+        </div>`;
+    }
+
+    function initCustomTabs() {
+        document.querySelectorAll('.block-tabs-wrapper').forEach(wrapper => {
+            const links = wrapper.querySelectorAll('.w-tab-link');
+            const panes = wrapper.querySelectorAll('.w-tab-pane');
+            links.forEach(link => {
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    const target = link.getAttribute('data-w-tab');
+                    links.forEach(l => l.classList.remove('w--current'));
+                    link.classList.add('w--current');
+                    panes.forEach(p => {
+                        p.classList.remove('w--tab-active'); p.style.display = 'none';
+                        if(p.getAttribute('data-w-tab') === target) { p.classList.add('w--tab-active'); p.style.display = 'block'; }
+                    });
+                };
+            });
+        });
+    }
+
+    function renderAdminView() {
+        const tabsContainer = document.getElementById('blocksTabs');
+        const contentContainer = document.getElementById('blocksContent');
+        tabsContainer.innerHTML = ''; contentContainer.innerHTML = '';
+        const keys = Object.keys(blocksData);
+        if (keys.length === 0) { contentContainer.innerHTML = '<div style="padding:20px;text-align:center;">لا توجد بلوكات حالياً.</div>'; return; }
+
+        keys.forEach((blockKey, index) => {
+            const blockData = blocksData[blockKey];
+            const tab = document.createElement('div');
+            tab.className = index === 0 ? 'tab active' : 'tab';
+            tab.dataset.tab = blockKey;
+            tab.innerHTML = `${blockData.name} <button onclick="editBlockName('${blockKey}')" style="background:none;border:none;cursor:pointer;margin-right:5px;font-size:12px;">✏️</button>`;
+            tab.onclick = (e) => { if(e.target.tagName !== 'BUTTON') activateAdminTab(blockKey); };
+            tabsContainer.appendChild(tab);
+            
+            const content = document.createElement('div');
+            content.className = index === 0 ? 'tab-content active' : 'tab-content';
+            content.id = 'admin-' + blockKey;
+            content.innerHTML = `
+                <div class="block-header"><h2>${blockData.name}</h2><div class="block-actions"><button class="btn btn-primary" onclick="openPlotModal('${blockKey}')">إضافة قطعة</button><button class="btn btn-danger" onclick="deleteBlock('${blockKey}')">حذف البلوك</button></div></div>
+                <table><thead><tr><th>رقم القطعة</th><th>النوع</th><th>المساحة</th><th>السعر</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody>
+                    ${blockData.plots.map(plot => `<tr><td>${plot.plotNumber}</td><td>${plot.type || 'مستكمل'}</td><td>${plot.area}</td><td>${plot.price}</td><td>${plot.status}</td><td class="action-buttons"><button class="action-btn edit-btn" onclick="openPlotModal('${blockKey}', ${plot.id})">تعديل</button><button class="action-btn delete-btn" onclick="deletePlot('${blockKey}', ${plot.id})">حذف</button></td></tr>`).join('')}
+                </tbody></table>`;
+            contentContainer.appendChild(content);
+        });
+    }
+
+    function activateAdminTab(blockKey) {
+        document.querySelectorAll('#admin-wrapper .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#admin-wrapper .tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${blockKey}"]`).classList.add('active');
+        document.getElementById('admin-' + blockKey).classList.add('active');
+    }
+
+    function showMap(isAdminMode) {
+        isMapAdminMode = isAdminMode; 
+        document.getElementById('admin-wrapper').style.display = 'none';
+        document.getElementById('public-wrapper').style.display = 'block'; 
+        document.getElementById('map-wrapper').style.display = 'block';
+        setTimeout(() => { map.invalidateSize(); }, 200); 
+        
+        // عرض أدوات التحكم للمسؤول فقط
+        document.getElementById('drawBoardBtn').style.display = isAdminMode ? 'inline-block' : 'none';
+        document.getElementById('clearAllBtn').style.display = isAdminMode ? 'inline-block' : 'none';
+        document.getElementById('exitMapBtn').style.display = isAdminMode ? 'inline-block' : 'none';
+        document.getElementById('mapBackBtn').style.display = isAdminMode ? 'none' : 'flex';
+        document.getElementById('externalHomeBtn').style.display = isAdminMode ? 'none' : 'flex'; // إخفاء زر الرئيسية للمسؤول
+        
+        document.getElementById('modernLandCard').style.display = 'none';
+        document.getElementById('editPanel').style.display = 'none';
+        if(document.getElementById('adminActionCard')) document.getElementById('adminActionCard').style.display = 'none';
+        
+        renderAllMapLands();
+    }
+    
+    document.getElementById('publicMapBtn').onclick = document.getElementById('publicMapLink').onclick = (e) => {
+        e.preventDefault();
+        showMap(false);
+    };
+
+    document.getElementById('mapBackBtn').onclick = (e) => {
+        e.preventDefault();
+        showPublic();
+    };
+
+    function showAdmin() {
+        document.getElementById('public-wrapper').style.display = 'none';
+        document.getElementById('map-wrapper').style.display = 'none';
+        document.getElementById('admin-wrapper').style.display = 'block';
+        renderAdminView();
+    }
+
+    function showPublic() {
+        document.getElementById('admin-wrapper').style.display = 'none';
+        document.getElementById('map-wrapper').style.display = 'none';
+        document.getElementById('public-wrapper').style.display = 'block';
+        renderPublicView(); 
+    }
+
+    // --- تسجيل الدخول ---
+    function updateLoginButtonState() {
+        if(localStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('loginButtonText').innerText = "لوحة التحكم";
+            document.getElementById('logoutContainer').style.display = 'block';
+        } else {
+            document.getElementById('loginButtonText').innerText = "تسجيل دخول مسؤول";
+            document.getElementById('logoutContainer').style.display = 'none';
+        }
+    }
+    function logout() { localStorage.removeItem('isLoggedIn'); updateLoginButtonState(); showPublic(); }
+    document.getElementById('logoutBtnMain').onclick = logout;
+    document.getElementById('showLoginBtn').onclick = function() {
+        if(localStorage.getItem('isLoggedIn') === 'true') showAdmin();
+        else document.getElementById('loginModalOverlay').style.display = 'flex';
+    };
+    document.getElementById('closeLoginBtn').onclick = () => document.getElementById('loginModalOverlay').style.display = 'none';
+    document.getElementById('loginForm').onsubmit = (e) => {
+        e.preventDefault();
+        if(document.getElementById('loginUser').value === 'Admin' && document.getElementById('loginPass').value === 'Admin') {
+            document.getElementById('loginModalOverlay').style.display = 'none';
+            localStorage.setItem('isLoggedIn', 'true');
+            updateLoginButtonState();
+            showAdmin();
+        } else { document.getElementById('loginError').style.display = 'block'; }
+    };
+
+    document.getElementById('backToMainBtn').onclick = showPublic;
+    document.getElementById('openMapEditBtn').onclick = () => showMap(true);
+    document.getElementById('exitMapBtn').onclick = showAdmin;
+
+    // --- دوال لوحة التحكم ---
+    window.openPlotModal = function(blockKey, plotId = null) {
+        document.getElementById('blockNumber').value = blockKey;
+        document.getElementById('plotId').value = plotId || '';
+        const modal = document.getElementById('plotModal');
+        if (plotId) {
+            const plot = blocksData[blockKey].plots.find(p => p.id === plotId);
+            document.getElementById('plotNumber').value = plot.plotNumber;
+            document.getElementById('area').value = plot.area;
+            document.getElementById('price').value = plot.price;
+            document.getElementById('status').value = plot.status;
+            document.getElementById('plotType').value = plot.type || 'مستكمل';
+            document.getElementById('plotWhatsapp').value = plot.whatsapp || '';
+            document.getElementById('plotModalTitle').innerText = 'تعديل قطعة أرض';
+        } else {
+            document.getElementById('plotForm').reset();
+            document.getElementById('plotModalTitle').innerText = 'إضافة قطعة أرض';
+        }
+        modal.classList.add('active');
+    };
+
+    document.getElementById('plotForm').onsubmit = (e) => {
+        e.preventDefault();
+        const blockKey = document.getElementById('blockNumber').value;
+        const id = document.getElementById('plotId').value;
+        const newPlot = {
+            id: id ? parseInt(id) : Date.now(),
+            plotNumber: document.getElementById('plotNumber').value,
+            area: parseFloat(document.getElementById('area').value),
+            price: parseFloat(document.getElementById('price').value),
+            status: document.getElementById('status').value,
+            type: document.getElementById('plotType').value,
+            whatsapp: document.getElementById('plotWhatsapp').value
+        };
+        if(id) {
+            const idx = blocksData[blockKey].plots.findIndex(p => p.id == id);
+            blocksData[blockKey].plots[idx] = newPlot;
+        } else { blocksData[blockKey].plots.push(newPlot); }
+        saveBlocksData();
+        document.getElementById('plotModal').classList.remove('active');
+        renderAdminView();
+    };
+
+    window.deletePlot = function(blockKey, id) {
+        if(confirm('هل أنت متأكد من الحذف؟')) {
+            blocksData[blockKey].plots = blocksData[blockKey].plots.filter(p => p.id !== id);
+            saveBlocksData(); renderAdminView();
+        }
+    };
+    window.deleteBlock = function(blockKey) {
+        if(confirm('هل أنت متأكد من حذف البلوك بالكامل؟')) {
+            delete blocksData[blockKey]; 
+            // إذا تم حذف جميع البلوكات، أنشئ واحداً افتراضياً
+            if (Object.keys(blocksData).length === 0) {
+                 blocksData['block1'] = { name: 'بلوك 1', plots: [] };
+            }
+            saveBlocksData(); 
+            renderAdminView();
+        }
+    };
+    window.editBlockName = function(key) {
+        document.getElementById('editBlockKey').value = key;
+        document.getElementById('blockNameInput').value = blocksData[key].name;
+        document.getElementById('blockNameModal').classList.add('active');
+    };
+    document.getElementById('blockNameForm').onsubmit = (e) => {
+        e.preventDefault();
+        const key = document.getElementById('editBlockKey').value;
+        blocksData[key].name = document.getElementById('blockNameInput').value;
+        saveBlocksData(); document.getElementById('blockNameModal').classList.remove('active'); renderAdminView();
+    };
+    document.getElementById('addBlockBtn').onclick = () => {
+        const newKey = 'block' + (Object.keys(blocksData).length + 1);
+        blocksData[newKey] = { name: 'بلوك جديد', plots: [] };
+        saveBlocksData(); renderAdminView();
+    };
+
+    document.getElementById('cancelPlotBtn').onclick = () => document.getElementById('plotModal').classList.remove('active');
+    document.getElementById('cancelBlockNameBtn').onclick = () => document.getElementById('blockNameModal').classList.remove('active');
+    document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.add('active');
+    document.getElementById('cancelSettingsBtn').onclick = () => document.getElementById('settingsModal').classList.remove('active');
+
+    // تهيئة البيانات
+    if(!localStorage.getItem('blocksData')) saveBlocksData();
+    updateLoginButtonState();
+    renderAllMapLands();
+    renderPublicView();
+
+</script>
+</body>
+</html>
